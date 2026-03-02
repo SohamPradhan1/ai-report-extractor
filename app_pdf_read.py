@@ -1,5 +1,4 @@
 import streamlit as st
-import fitz  # PyMuPDF
 import pdfplumber
 import pandas as pd
 import re
@@ -11,14 +10,11 @@ st.set_page_config(page_title="AI Report Extractor", layout="wide")
 # -----------------------------
 # PDF TEXT EXTRACTION
 # -----------------------------
-def extract_text_from_bytes(file_bytes: bytes) -> str:
-    # Open directly from bytes (works on Streamlit Cloud)
-    doc = fitz.open(stream=file_bytes, filetype="pdf")
-    full_text = []
-    for page in doc:
-        full_text.append(page.get_text("text"))
-    return "\n".join(full_text)
 
+def extract_text_from_bytes(file_bytes: bytes) -> str:
+    with pdfplumber.open(BytesIO(file_bytes)) as pdf:
+        pages_text = [page.extract_text() or "" for page in pdf.pages]
+    return "\n".join(pages_text)
 # -----------------------------
 # PDF TABLE EXTRACTION
 # -----------------------------
